@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Town Game - Simple Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .cat { font-size: 3em; cursor: grab; }
+        .building { border: 2px solid #333; padding: 15px; margin: 10px; display: inline-block; }
+        .btn { background: #4CAF50; color: white; padding: 10px; margin: 5px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🏛️ Town Economy Game (TEST)</h1>
+    
+    <div>
+        <p>💰 Budget: <span id="budget">1000</span> | 😊 Happiness: <span id="happiness">50</span></p>
+    </div>
+    
+    <div class="cat" draggable="true">🐱 Mayor Cat</div>
+    
+    <div>
+        <div class="building">🏫 School</div>
+        <div class="building">🏛️ City Hall</div>
+    </div>
+    
+    <div id="message" style="border: 1px solid #ccc; padding: 10px; margin: 20px 0;">
+        Welcome Mayor! Test the features below.
+    </div>
+    
+    <button class="btn" onclick="testGemini()">Test AI</button>
+    <button class="btn" onclick="testVoice()">Test Voice</button>
+    <button class="btn" onclick="testPredictions()">Test Predictions</button>
+    
+    <input type="text" id="input" placeholder="Type for predictions...">
+    <div id="predictions"></div>
+    
+    <script>
+        async function testGemini() {
+            const response = await fetch('/api/gemini?prompt=pizza');
+            const data = await response.json();
+            document.getElementById('message').innerHTML = data.response;
+        }
+        
+        async function testVoice() {
+    const response = await fetch('/api/speak', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: 'Hello from the town mayor!'})
+    });
+    
+    const data = await response.json();
+    console.log('Voice response:', data);
+    
+    // Actually play the audio
+    if (data.audio_url) {
+        const audio = new Audio(data.audio_url);
+        audio.play().then(() => {
+            alert('Playing voice: ' + data.text);
+        }).catch(error => {
+            console.error('Error playing audio:', error);
+            alert('Audio ready but could not play automatically. Click OK to try again.');
+            audio.play(); // Try again
+        });
+    } else {
+        alert('Voice response: ' + JSON.stringify(data));
+    }
+}
+        
+        async function testPredictions() {
+            const input = document.getElementById('input').value;
+            if (input) {
+                const response = await fetch('/api/predict?text=' + input);
+                const data = await response.json();
+                document.getElementById('predictions').innerHTML = 
+                    'Suggestions: ' + data.predictions.join(', ');
+            }
+        }
+        
+        // Setup input event
+        document.getElementById('input').addEventListener('input', testPredictions);
+    </script>
+</body>
+</html>
