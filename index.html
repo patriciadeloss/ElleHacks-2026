@@ -1,83 +1,483 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Town Game - Simple Test</title>
+    <title>Town Economy Game - Mayor Cat</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        .cat { font-size: 3em; cursor: grab; }
-        .building { border: 2px solid #333; padding: 15px; margin: 10px; display: inline-block; }
-        .btn { background: #4CAF50; color: white; padding: 10px; margin: 5px; border: none; cursor: pointer; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            color: #333;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #4a5568; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .cat-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .cat {
+            font-size: 4em;
+            cursor: grab;
+            transition: transform 0.3s;
+            display: inline-block;
+            padding: 20px;
+        }
+        .cat:hover {
+            transform: scale(1.1);
+        }
+        .buildings {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .building {
+            background: #4299e1;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 150px;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+        .building:hover {
+            background: #3182ce;
+            transform: translateY(-5px);
+            border-color: #2b6cb0;
+        }
+        .building.dragover {
+            border-color: #f56565;
+            background: #fc8181;
+        }
+        .message-box {
+            background: white;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 100px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #48bb78;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #38a169;
+        }
+        .btn-secondary {
+            background: #4299e1;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #3182ce;
+        }
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        .phase-indicator {
+            background: #4c51bf;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .audio-controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #dynamic-data {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+        .exploration-hint {
+            text-align: center;
+            color: #718096;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .ending {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            border-radius: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+        .trophy {
+            font-size: 5em;
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>🏛️ Town Economy Game (TEST)</h1>
-    
-    <div>
-        <p>💰 Budget: <span id="budget">1000</span> | 😊 Happiness: <span id="happiness">50</span></p>
+    <div class="container">
+        <h1>🏛️ Town Economy Game - Mayor Cat 🐱</h1>
+        
+        <div class="phase-indicator" id="phase-indicator">Introduction</div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div>💰 Budget</div>
+                <div class="stat-value" id="budget">1000</div>
+            </div>
+            <div class="stat-item">
+                <div>😊 Happiness</div>
+                <div class="stat-value" id="happiness">50</div>
+            </div>
+            <div class="stat-item">
+                <div>📅 Day</div>
+                <div class="stat-value" id="day">0</div>
+            </div>
+            <div class="stat-item">
+                <div>🎯 Phase</div>
+                <div class="stat-value" id="scenario-day">1</div>
+            </div>
+        </div>
+        
+        <div class="exploration-hint">
+            💡 Drag the Mayor Cat onto buildings to explore the town!
+        </div>
+        
+        <div class="cat-container">
+            <div class="cat" draggable="true" id="mayor-cat">🐱 Mayor Cat</div>
+        </div>
+        
+        <div class="buildings">
+            <div class="building" data-building="school" id="school">🏫 School</div>
+            <div class="building" data-building="city_hall" id="city-hall">🏛️ City Hall</div>
+            <div class="building" data-building="park" id="park">🌳 Park</div>
+            <div class="building" data-building="market" id="market">🛒 Market</div>
+            <div class="building" data-building="museum" id="museum">🏛️ Museum Site</div>
+        </div>
+        
+        <div class="message-box" id="message">
+            Loading initial message...
+        </div>
+        
+        <div id="dynamic-data"></div>
+        
+        <div class="options" id="options"></div>
+        
+        <div class="audio-controls">
+            <button class="btn btn-secondary" onclick="speakCurrentMessage()">🔊 Speak Message</button>
+            <button class="btn btn-secondary" onclick="nextPhase()">⏭️ Next Phase</button>
+            <button class="btn btn-danger" onclick="resetGame()">🔄 Reset Game</button>
+        </div>
+        
+        <div class="ending" id="ending">
+            <h2>Game Complete!</h2>
+            <div class="trophy" id="trophy">🏆</div>
+            <div id="ending-message"></div>
+            <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+        </div>
     </div>
-    
-    <div class="cat" draggable="true">🐱 Mayor Cat</div>
-    
-    <div>
-        <div class="building">🏫 School</div>
-        <div class="building">🏛️ City Hall</div>
-    </div>
-    
-    <div id="message" style="border: 1px solid #ccc; padding: 10px; margin: 20px 0;">
-        Welcome Mayor! Test the features below.
-    </div>
-    
-    <button class="btn" onclick="testGemini()">Test AI</button>
-    <button class="btn" onclick="testVoice()">Test Voice</button>
-    <button class="btn" onclick="testPredictions()">Test Predictions</button>
-    
-    <input type="text" id="input" placeholder="Type for predictions...">
-    <div id="predictions"></div>
     
     <script>
-        async function testGemini() {
-            const response = await fetch('/api/gemini?prompt=pizza');
-            const data = await response.json();
-            document.getElementById('message').innerHTML = data.response;
+        let currentPhase = 'introduction';
+        let currentMessage = '';
+        let dynamicData = {};
+        
+        // Initialize game
+        async function initGame() {
+            await updateGameState();
+            await loadScenario(currentPhase);
         }
         
-        async function testVoice() {
-    const response = await fetch('/api/speak', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({text: 'Hello from the town mayor!'})
-    });
-    
-    const data = await response.json();
-    console.log('Voice response:', data);
-    
-    // Actually play the audio
-    if (data.audio_url) {
-        const audio = new Audio(data.audio_url);
-        audio.play().then(() => {
-            alert('Playing voice: ' + data.text);
-        }).catch(error => {
-            console.error('Error playing audio:', error);
-            alert('Audio ready but could not play automatically. Click OK to try again.');
-            audio.play(); // Try again
-        });
-    } else {
-        alert('Voice response: ' + JSON.stringify(data));
-    }
-}
-        
-        async function testPredictions() {
-            const input = document.getElementById('input').value;
-            if (input) {
-                const response = await fetch('/api/predict?text=' + input);
+        // Load a scenario
+        async function loadScenario(phase, building = null, person = null) {
+            try {
+                let url = `/api/gemini/scenario?phase=${phase}`;
+                if (building) url += `&building=${building}`;
+                if (person) url += `&person=${person}`;
+                
+                const response = await fetch(url);
                 const data = await response.json();
-                document.getElementById('predictions').innerHTML = 
-                    'Suggestions: ' + data.predictions.join(', ');
+                
+                currentPhase = data.phase;
+                currentMessage = data.response;
+                dynamicData = data.dynamic_data;
+                
+                // Update UI
+                document.getElementById('phase-indicator').textContent = 
+                    currentPhase.charAt(0).toUpperCase() + currentPhase.slice(1);
+                document.getElementById('message').innerHTML = currentMessage;
+                
+                // Show dynamic data if available
+                const dynamicDiv = document.getElementById('dynamic-data');
+                if (Object.keys(dynamicData).length > 0) {
+                    dynamicDiv.style.display = 'block';
+                    dynamicDiv.innerHTML = '<h3>📊 Today\'s Numbers:</h3>' + 
+                        Object.entries(dynamicData).map(([key, value]) => 
+                            `<div><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</div>`
+                        ).join('');
+                } else {
+                    dynamicDiv.style.display = 'none';
+                }
+                
+                // Show options
+                const optionsDiv = document.getElementById('options');
+                if (data.options && data.options.length > 0) {
+                    optionsDiv.innerHTML = data.options.map(option => 
+                        `<button class="btn btn-primary" onclick="makeDecision('${option.id}')">
+                            ${option.label}<br>
+                            <small>Cost: $${option.cost} | Happiness: ${option.happiness > 0 ? '+' : ''}${option.happiness}</small>
+                        </button>`
+                    ).join('');
+                } else {
+                    optionsDiv.innerHTML = '';
+                }
+                
+                // Auto-speak if it's a new scenario
+                if (phase !== 'exploration') {
+                    setTimeout(() => speakCurrentMessage(), 500);
+                }
+                
+            } catch (error) {
+                console.error('Error loading scenario:', error);
+                document.getElementById('message').innerHTML = 
+                    'Error loading scenario. Please try again.';
             }
         }
         
-        // Setup input event
-        document.getElementById('input').addEventListener('input', testPredictions);
+        // Speak the current message
+        async function speakCurrentMessage() {
+            try {
+                const response = await fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: currentMessage})
+                });
+                
+                const data = await response.json();
+                
+                if (data.audio_url) {
+                    const audio = new Audio(data.audio_url);
+                    audio.play().catch(e => console.log('Auto-play prevented:', e));
+                }
+            } catch (error) {
+                console.error('Error with speech:', error);
+            }
+        }
+        
+        // Make a decision
+        async function makeDecision(decisionId) {
+            try {
+                const response = await fetch('/api/game/decision', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id: decisionId,
+                        phase: currentPhase
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Update local state
+                await updateGameState();
+                
+                // Load next phase or show ending
+                if (currentPhase === 'final') {
+                    showEnding(result.state.ending);
+                } else {
+                    await loadScenario(result.state.game_phase);
+                }
+                
+            } catch (error) {
+                console.error('Error making decision:', error);
+            }
+        }
+        
+        // Show ending
+        function showEnding(endingType) {
+            const endingMessages = {
+                perfect: "🎉 PERFECT ENDING! You built the museum and kept everyone happy! You're re-elected as Mayor! 🏆",
+                beloved: "❤️ BELOVED ENDING: While short on funds, your compassion made you the most loved Mayor!",
+                rich: "💰 RICH ENDING: You saved money but lost the people's trust. You retire wealthy but alone.",
+                balanced: "⚖️ BALANCED ENDING: You made reasonable choices. The town is stable if not spectacular."
+            };
+            
+            const trophies = {
+                perfect: "🏆✨",
+                beloved: "❤️🏆",
+                rich: "💰🏆",
+                balanced: "⚖️🏆"
+            };
+            
+            document.getElementById('ending-message').innerHTML = 
+                endingMessages[endingType] || "Game complete!";
+            document.getElementById('trophy').textContent = 
+                trophies[endingType] || "🏆";
+            document.getElementById('ending').style.display = 'block';
+            document.querySelector('.container').scrollIntoView({behavior: 'smooth'});
+        }
+        
+        // Next phase
+        async function nextPhase() {
+            const phases = ['introduction', 'exploration', 'day1', 'day2', 'day3', 'final'];
+            const currentIndex = phases.indexOf(currentPhase);
+            if (currentIndex < phases.length - 1) {
+                await loadScenario(phases[currentIndex + 1]);
+            } else {
+                alert('Game complete!');
+            }
+        }
+        
+        // Reset game
+        async function resetGame() {
+            if (confirm('Reset the game to start over?')) {
+                try {
+                    await fetch('/api/game/reset', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'}
+                    });
+                    
+                    // Hide ending
+                    document.getElementById('ending').style.display = 'none';
+                    
+                    // Reload game
+                    await initGame();
+                    
+                } catch (error) {
+                    console.error('Error resetting game:', error);
+                    location.reload();
+                }
+            }
+        }
+        
+        // Update game state display
+        async function updateGameState() {
+            try {
+                const response = await fetch('/api/game/state');
+                const state = await response.json();
+                
+                document.getElementById('budget').textContent = state.budget;
+                document.getElementById('happiness').textContent = state.happiness;
+                document.getElementById('day').textContent = state.day;
+                document.getElementById('scenario-day').textContent = state.scenario_day;
+                
+                // Update game phase if needed
+                if (state.game_phase !== currentPhase && 
+                    !['day1', 'day2', 'day3', 'final'].includes(currentPhase)) {
+                    currentPhase = state.game_phase;
+                }
+                
+            } catch (error) {
+                console.error('Error updating game state:', error);
+            }
+        }
+        
+        // Drag and drop for exploration
+        document.addEventListener('DOMContentLoaded', () => {
+            const cat = document.getElementById('mayor-cat');
+            const buildings = document.querySelectorAll('.building');
+            
+            // Drag start
+            cat.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', 'mayor-cat');
+                setTimeout(() => cat.style.opacity = '0.4', 0);
+            });
+            
+            // Drag end
+            cat.addEventListener('dragend', () => {
+                cat.style.opacity = '1';
+                buildings.forEach(b => b.classList.remove('dragover'));
+            });
+            
+            // Drag over buildings
+            buildings.forEach(building => {
+                building.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    building.classList.add('dragover');
+                });
+                
+                building.addEventListener('dragleave', () => {
+                    building.classList.remove('dragover');
+                });
+                
+                building.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    building.classList.remove('dragover');
+                    
+                    const buildingName = building.dataset.building;
+                    
+                    // Record exploration
+                    await fetch('/api/game/explore', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            building: buildingName
+                        })
+                    });
+                    
+                    // Load exploration scenario
+                    await loadScenario('exploration', buildingName);
+                });
+            });
+            
+            // Initialize game
+            initGame();
+        });
     </script>
 </body>
 </html>
