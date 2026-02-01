@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
-    <title>Instructions</title>
+    <title>Welcome to PennyVille</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,10 +17,21 @@
             align-items: center;
             justify-content: center;
             background: #f5f5f5;
+
+                background-image: url('/_static/img/title.png');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            transition: background-image 0.5s ease-in-out;
+        }
+
+        .title {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
         }
 
         .btn {
@@ -29,12 +40,12 @@
             color: white;
             height: 8vh;
             width: 20vw;
+            padding: 10px 25px;
             border-radius: 16px;
             border: #f5f5f5 5px solid;
             box-shadow: #666 2px 2px 10px;
             align-items: center;
-            transform: translateY(35vh);
-            white-space: normal;
+            transform: translateY(27vh);
 
             text-decoration: none;
             font-weight: bold;
@@ -45,38 +56,12 @@
 
         .btn:hover {
             background: #47903a;
-            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-    <button class="btn" id="nextBtn" onclick="nextInstruction()">Next</button>
-
-    <script>
-        let currentInstruction = 1;
-        const totalInstructions = 2;
-
-        function showInstruction(instructionNum) {
-            const body = document.body;
-            body.style.backgroundImage = `url('/static/img/instruction${instructionNum}.png')`;
-        }
-
-        function nextInstruction() {
-            if (currentInstruction < totalInstructions) {
-                currentInstruction++;
-                showInstruction(currentInstruction);
-            } else {
-                // Navigate to intro.html to start the game
-                window.location.href = '/static/intro.html';
-            }
-        }
-
-        // Show first instruction on page load
-        window.onload = () => {
-            showInstruction(currentInstruction);
-        };
-    </script>
+        <a class="btn" href="/_static/instructions.html">Start</a>
 </body>
 
 </html>

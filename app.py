@@ -18,7 +18,7 @@ load_dotenv()
 app = FastAPI(title="Town Economy Game", version="1.0")
 
 # Serve static files (HTML, CSS, JS)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/_static", StaticFiles(directory="_static"), name="_static")
 
 # Configure APIs
 genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -50,7 +50,7 @@ game_state = {
 # Homepage
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    with open("static/index.html", "r", encoding="utf-8") as f:
+    with open("_static/index.html", "r", encoding="utf-8") as f:
         return f.read()
 
 # Generate all 3 scenarios at once using Gemini AI
@@ -323,7 +323,7 @@ async def text_to_speech(request: dict):
         if not eleven_client:
             # Fall back to mock mode if no API key
             return {
-                "audio_url": "/static/audio/mock.mp3", 
+                "audio_url": "/_static/audio/mock.mp3",
                 "text": text_content,
                 "status": "mock_mode",
                 "message": "ElevenLabs API key not configured. Using mock voice."
@@ -385,7 +385,7 @@ async def text_to_speech(request: dict):
         print(f"❌ Error generating speech: {e}")
         # Fall back to mock mode on error
         return {
-            "audio_url": "/static/audio/mock.mp3", 
+            "audio_url": "/_static/audio/mock.mp3",
             "text": text_content if 'text_content' in locals() else str(request),
             "status": "error",
             "message": f"Failed to generate voice: {str(e)}"
