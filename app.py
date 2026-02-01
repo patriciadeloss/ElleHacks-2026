@@ -50,7 +50,7 @@ game_state = {
 # Homepage
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    with open("index.html", "r", encoding="utf-8") as f:
+    with open("_static/index.html", "r", encoding="utf-8") as f:
         return f.read()
 
 # Generate all 3 scenarios at once using Gemini AI
