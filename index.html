@@ -1,483 +1,691 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Town Economy Game - Mayor Cat</title>
+    <title>Town Economy Game - Scenarios</title>
     <style>
-        body { 
-            font-family: 'Arial', sans-serif; 
-            padding: 20px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f5f5f5;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 20px;
-            color: #333;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        h1 { 
-            color: #4a5568; 
+
+        h1 {
             text-align: center;
-            margin-bottom: 30px;
+            color: #333;
         }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 10px;
+
+        .scenario-page {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .scenario-page.active {
+            display: block;
+        }
+
+        .scenario-box {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 24px;
+
+        .scenario-title {
+            font-size: 1.8em;
             font-weight: bold;
-            color: #2d3748;
-        }
-        .cat-container {
+            margin-bottom: 15px;
+            color: #2c3e50;
             text-align: center;
-            margin: 30px 0;
         }
-        .cat {
-            font-size: 4em;
-            cursor: grab;
-            transition: transform 0.3s;
-            display: inline-block;
-            padding: 20px;
-        }
-        .cat:hover {
-            transform: scale(1.1);
-        }
-        .buildings {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin: 30px 0;
-        }
-        .building {
-            background: #4299e1;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            min-width: 150px;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-        }
-        .building:hover {
-            background: #3182ce;
-            transform: translateY(-5px);
-            border-color: #2b6cb0;
-        }
-        .building.dragover {
-            border-color: #f56565;
-            background: #fc8181;
-        }
-        .message-box {
-            background: white;
-            border: 2px solid #cbd5e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            min-height: 100px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            font-size: 18px;
+
+        .scenario-description {
+            color: #666;
+            margin-bottom: 25px;
             line-height: 1.6;
+            font-size: 1.1em;
+            text-align: left;
         }
-        .options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+
+        .options-container {
+            display: grid;
+            gap: 15px;
             margin: 20px 0;
         }
+
+        .option-button {
+            background: white;
+            border: 3px solid #ddd;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option-button:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-button.selected {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .option-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .option-price {
+            color: #27ae60;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .option-details {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .option-total {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+
+        .analysis-section {
+            display: none;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .analysis-loading {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .analysis-loading.show {
+            display: flex;
+        }
+
+        .analysis-hidden {
+            display: none;
+        }
+
+        .analysis-spinner {
+            border: 4px solid #bbdefb;
+            border-top: 4px solid #1976d2;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        .analysis-section.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .analysis-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .analysis-content {
+            color: #856404;
+            line-height: 1.6;
+            font-size: 1.05em;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
         .btn {
+            background: #4CAF50;
+            color: white;
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 1em;
             font-weight: bold;
-            transition: all 0.3s;
         }
-        .btn-primary {
-            background: #48bb78;
-            color: white;
+
+        .btn:hover {
+            background: #43a047;
         }
-        .btn-primary:hover {
-            background: #38a169;
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
+
         .btn-secondary {
-            background: #4299e1;
-            color: white;
+            background: #666;
         }
+
         .btn-secondary:hover {
-            background: #3182ce;
+            background: #555;
         }
-        .btn-danger {
-            background: #f56565;
-            color: white;
+
+        .btn-submit {
+            background: #2196F3;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            margin-top: 20px;
         }
-        .btn-danger:hover {
-            background: #e53e3e;
+
+        .btn-submit:hover:not(:disabled) {
+            background: #1976D2;
         }
-        .phase-indicator {
-            background: #4c51bf;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
+
+        .btn-listen {
+            background: #9C27B0;
+            padding: 12px 24px;
             margin-bottom: 20px;
+        }
+
+        .btn-listen:hover:not(:disabled) {
+            background: #7B1FA2;
+        }
+
+        .btn-listen:disabled {
+            background: #ccc;
+        }
+
+        .option-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .audio-status {
+            text-align: center;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #1976d2;
             font-weight: bold;
         }
-        .audio-controls {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        #dynamic-data {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-        }
-        .exploration-hint {
+
+        .progress-indicator {
             text-align: center;
-            color: #718096;
-            font-style: italic;
-            margin-top: 10px;
+            font-size: 1.2em;
+            color: #666;
         }
-        .ending {
+
+        .top-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+
+        .loading {
             text-align: center;
             padding: 40px;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            border-radius: 20px;
-            margin-top: 30px;
-            display: none;
+            font-size: 1.2em;
+            color: #666;
         }
-        .trophy {
-            font-size: 5em;
-            margin: 20px;
+
+        .scenario-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-text {
+            flex: 1;
+        }
+
+        .cat-image {
+            width: 120px;
+            height: 120px;
+            min-width: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>🏛️ Town Economy Game - Mayor Cat 🐱</h1>
-        
-        <div class="phase-indicator" id="phase-indicator">Introduction</div>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <div>💰 Budget</div>
-                <div class="stat-value" id="budget">1000</div>
-            </div>
-            <div class="stat-item">
-                <div>😊 Happiness</div>
-                <div class="stat-value" id="happiness">50</div>
-            </div>
-            <div class="stat-item">
-                <div>📅 Day</div>
-                <div class="stat-value" id="day">0</div>
-            </div>
-            <div class="stat-item">
-                <div>🎯 Phase</div>
-                <div class="stat-value" id="scenario-day">1</div>
-            </div>
+    <h1>🏛️ Mayor's Decision Dashboard</h1>
+
+    <div class="top-bar">
+        <div>
+            <span style="font-size: 1.2em;">💰 Budget: <span id="budget">$1000</span></span>
+            <span style="margin-left: 30px; font-size: 1.2em;">😊 Happiness: <span id="happiness">50</span></span>
         </div>
-        
-        <div class="exploration-hint">
-            💡 Drag the Mayor Cat onto buildings to explore the town!
-        </div>
-        
-        <div class="cat-container">
-            <div class="cat" draggable="true" id="mayor-cat">🐱 Mayor Cat</div>
-        </div>
-        
-        <div class="buildings">
-            <div class="building" data-building="school" id="school">🏫 School</div>
-            <div class="building" data-building="city_hall" id="city-hall">🏛️ City Hall</div>
-            <div class="building" data-building="park" id="park">🌳 Park</div>
-            <div class="building" data-building="market" id="market">🛒 Market</div>
-            <div class="building" data-building="museum" id="museum">🏛️ Museum Site</div>
-        </div>
-        
-        <div class="message-box" id="message">
-            Loading initial message...
-        </div>
-        
-        <div id="dynamic-data"></div>
-        
-        <div class="options" id="options"></div>
-        
-        <div class="audio-controls">
-            <button class="btn btn-secondary" onclick="speakCurrentMessage()">🔊 Speak Message</button>
-            <button class="btn btn-secondary" onclick="nextPhase()">⏭️ Next Phase</button>
-            <button class="btn btn-danger" onclick="resetGame()">🔄 Reset Game</button>
-        </div>
-        
-        <div class="ending" id="ending">
-            <h2>Game Complete!</h2>
-            <div class="trophy" id="trophy">🏆</div>
-            <div id="ending-message"></div>
-            <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+        <div class="progress-indicator">
+            Scenario <span id="currentScenario">1</span> of <span id="totalScenarios">3</span>
         </div>
     </div>
-    
+
+    <div id="scenarios-container">
+        <div class="loading">Loading scenarios...</div>
+    </div>
+
     <script>
-        let currentPhase = 'introduction';
-        let currentMessage = '';
-        let dynamicData = {};
-        
-        // Initialize game
-        async function initGame() {
-            await updateGameState();
-            await loadScenario(currentPhase);
-        }
-        
-        // Load a scenario
-        async function loadScenario(phase, building = null, person = null) {
+        let scenarios = [];
+        let currentScenarioIndex = 0;
+        let selectedOption = null;
+        let hasSubmitted = false;
+        let currentAudio = null;
+
+        async function loadScenarios() {
+            const container = document.getElementById('scenarios-container');
+            container.innerHTML = '<div class="loading">Loading scenarios...</div>';
+
             try {
-                let url = `/api/gemini/scenario?phase=${phase}`;
-                if (building) url += `&building=${building}`;
-                if (person) url += `&person=${person}`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                currentPhase = data.phase;
-                currentMessage = data.response;
-                dynamicData = data.dynamic_data;
-                
-                // Update UI
-                document.getElementById('phase-indicator').textContent = 
-                    currentPhase.charAt(0).toUpperCase() + currentPhase.slice(1);
-                document.getElementById('message').innerHTML = currentMessage;
-                
-                // Show dynamic data if available
-                const dynamicDiv = document.getElementById('dynamic-data');
-                if (Object.keys(dynamicData).length > 0) {
-                    dynamicDiv.style.display = 'block';
-                    dynamicDiv.innerHTML = '<h3>📊 Today\'s Numbers:</h3>' + 
-                        Object.entries(dynamicData).map(([key, value]) => 
-                            `<div><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</div>`
-                        ).join('');
+                // First check if scenarios are already in sessionStorage
+                let data;
+                const storedScenarios = sessionStorage.getItem('gameScenarios');
+
+                if (storedScenarios) {
+                    data = { scenarios: JSON.parse(storedScenarios) };
+                    // Clear after loading
+                    sessionStorage.removeItem('gameScenarios');
                 } else {
-                    dynamicDiv.style.display = 'none';
+                    // Fallback to API call if not in storage
+                    const response = await fetch('/api/scenarios');
+                    data = await response.json();
                 }
-                
-                // Show options
-                const optionsDiv = document.getElementById('options');
-                if (data.options && data.options.length > 0) {
-                    optionsDiv.innerHTML = data.options.map(option => 
-                        `<button class="btn btn-primary" onclick="makeDecision('${option.id}')">
-                            ${option.label}<br>
-                            <small>Cost: $${option.cost} | Happiness: ${option.happiness > 0 ? '+' : ''}${option.happiness}</small>
-                        </button>`
-                    ).join('');
+
+                if (data.scenarios && data.scenarios.length > 0) {
+                    scenarios = data.scenarios;
+                    document.getElementById('totalScenarios').textContent = scenarios.length;
+                    displayScenario(0);
                 } else {
-                    optionsDiv.innerHTML = '';
+                    container.innerHTML = '<div class="loading">Error loading scenarios. Please refresh the page.</div>';
                 }
-                
-                // Auto-speak if it's a new scenario
-                if (phase !== 'exploration') {
-                    setTimeout(() => speakCurrentMessage(), 500);
-                }
-                
             } catch (error) {
-                console.error('Error loading scenario:', error);
-                document.getElementById('message').innerHTML = 
-                    'Error loading scenario. Please try again.';
+                console.error('Error:', error);
+                container.innerHTML = '<div class="loading">Error loading scenarios. Please refresh the page.</div>';
             }
         }
-        
-        // Speak the current message
-        async function speakCurrentMessage() {
+
+        function stopCurrentAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+        }
+
+        async function speakText(text, onLoaded, onEnded) {
+            if (!text) return;
+            stopCurrentAudio();
+
             try {
                 const response = await fetch('/api/speak', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text: currentMessage})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
                 });
-                
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
-                
+
                 if (data.audio_url) {
-                    const audio = new Audio(data.audio_url);
-                    audio.play().catch(e => console.log('Auto-play prevented:', e));
-                }
-            } catch (error) {
-                console.error('Error with speech:', error);
-            }
-        }
-        
-        // Make a decision
-        async function makeDecision(decisionId) {
-            try {
-                const response = await fetch('/api/game/decision', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        id: decisionId,
-                        phase: currentPhase
-                    })
-                });
-                
-                const result = await response.json();
-                
-                // Update local state
-                await updateGameState();
-                
-                // Load next phase or show ending
-                if (currentPhase === 'final') {
-                    showEnding(result.state.ending);
+                    currentAudio = new Audio(data.audio_url);
+                    if (typeof onLoaded === 'function') {
+                        onLoaded();
+                    }
+                    currentAudio.onended = () => {
+                        if (typeof onEnded === 'function') {
+                            onEnded();
+                        }
+                    };
+                    try {
+                        await currentAudio.play();
+                    } catch (playError) {
+                        console.error('Play error:', playError);
+                        if (typeof onLoaded === 'function') {
+                            onLoaded();
+                        }
+                        if (typeof onEnded === 'function') {
+                            onEnded();
+                        }
+                    }
                 } else {
-                    await loadScenario(result.state.game_phase);
+                    throw new Error('No audio URL in response');
                 }
-                
             } catch (error) {
-                console.error('Error making decision:', error);
-            }
-        }
-        
-        // Show ending
-        function showEnding(endingType) {
-            const endingMessages = {
-                perfect: "🎉 PERFECT ENDING! You built the museum and kept everyone happy! You're re-elected as Mayor! 🏆",
-                beloved: "❤️ BELOVED ENDING: While short on funds, your compassion made you the most loved Mayor!",
-                rich: "💰 RICH ENDING: You saved money but lost the people's trust. You retire wealthy but alone.",
-                balanced: "⚖️ BALANCED ENDING: You made reasonable choices. The town is stable if not spectacular."
-            };
-            
-            const trophies = {
-                perfect: "🏆✨",
-                beloved: "❤️🏆",
-                rich: "💰🏆",
-                balanced: "⚖️🏆"
-            };
-            
-            document.getElementById('ending-message').innerHTML = 
-                endingMessages[endingType] || "Game complete!";
-            document.getElementById('trophy').textContent = 
-                trophies[endingType] || "🏆";
-            document.getElementById('ending').style.display = 'block';
-            document.querySelector('.container').scrollIntoView({behavior: 'smooth'});
-        }
-        
-        // Next phase
-        async function nextPhase() {
-            const phases = ['introduction', 'exploration', 'day1', 'day2', 'day3', 'final'];
-            const currentIndex = phases.indexOf(currentPhase);
-            if (currentIndex < phases.length - 1) {
-                await loadScenario(phases[currentIndex + 1]);
-            } else {
-                alert('Game complete!');
-            }
-        }
-        
-        // Reset game
-        async function resetGame() {
-            if (confirm('Reset the game to start over?')) {
-                try {
-                    await fetch('/api/game/reset', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'}
-                    });
-                    
-                    // Hide ending
-                    document.getElementById('ending').style.display = 'none';
-                    
-                    // Reload game
-                    await initGame();
-                    
-                } catch (error) {
-                    console.error('Error resetting game:', error);
-                    location.reload();
+                console.error('Error generating speech:', error);
+                if (typeof onLoaded === 'function') {
+                    onLoaded();
+                }
+                if (typeof onEnded === 'function') {
+                    onEnded();
                 }
             }
         }
-        
-        // Update game state display
-        async function updateGameState() {
+
+        function displayScenario(index) {
+            // Stop any currently playing audio
+            stopCurrentAudio();
+
+            currentScenarioIndex = index;
+            selectedOption = null;
+            hasSubmitted = false;
+            const container = document.getElementById('scenarios-container');
+            const scenario = scenarios[index];
+
+            document.getElementById('currentScenario').textContent = index + 1;
+
+            container.innerHTML = `
+                <div class="scenario-page active">
+                    <div class="scenario-box">
+                        <div class="scenario-title">${scenario.title}</div>
+                        
+                        <div class="scenario-header">
+                            <img src="img/cat.jpg" alt="Cat" class="cat-image">
+                            <div class="scenario-description">${scenario.description}</div>
+                        </div>
+                        
+                        <div class="audio-status" id="audioStatus-${index}">
+                            🔊 Playing scenario... Please wait.
+                        </div>
+                        
+                        <div class="options-container">
+                            <div class="option-button disabled" id="optionA-${index}" onclick="selectOption('A', ${index})">
+                                <div class="option-header">Option A: ${scenario.optionA.name}</div>
+                                <div class="option-price">$${scenario.optionA.price} ${scenario.optionA.unit_label || 'per unit'}</div>
+                                <div class="option-details">${scenario.optionA.details}</div>
+                                <div class="option-total">Total Cost: $${scenario.optionA.total}</div>
+                            </div>
+                            
+                            <div class="option-button disabled" id="optionB-${index}" onclick="selectOption('B', ${index})">
+                                <div class="option-header">Option B: ${scenario.optionB.name}</div>
+                                <div class="option-price">$${scenario.optionB.price} ${scenario.optionB.unit_label || 'per unit'}</div>
+                                <div class="option-details">${scenario.optionB.details}</div>
+                                <div class="option-total">Total Cost: $${scenario.optionB.total}</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-submit" id="submitBtn-${index}" onclick="submitAnswer(${index})" disabled>
+                            Submit Answer
+                        </button>
+                        
+                        <div class="analysis-section" id="analysis-${index}">
+                            <div class="analysis-loading" id="analysis-loading-${index}">
+                                <div class="analysis-spinner"></div>
+                                <div>Analyzing your decision...</div>
+                            </div>
+                            <div class="analysis-title" id="analysis-title-${index}"></div>
+                            <div class="analysis-content" id="analysis-content-${index}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="navigation">
+                        <button class="btn btn-secondary" onclick="previousScenario()" ${index === 0 ? 'disabled' : ''}>
+                            ← Previous
+                        </button>
+                        <button class="btn" id="nextBtn-${index}" onclick="nextScenario()" ${index === scenarios.length - 1 ? 'style="display:none"' : ''} disabled>
+                            Next →
+                        </button>
+                        <button class="btn" id="finishBtn-${index}" onclick="finishGame()" ${index === scenarios.length - 1 ? '' : 'style="display:none"'} disabled>
+                            Finish Game 🎉
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Auto-play voice for this scenario
+            playScenarioVoice(index);
+        }
+
+        async function playScenarioVoice(scenarioIndex) {
+            const scenario = scenarios[scenarioIndex];
+            const audioStatus = document.getElementById(`audioStatus-${scenarioIndex}`);
+
+            // Create the text to speak (scenario only)
+            const scenarioText = `${scenario.title}. ${scenario.description}.`;
+
+            console.log('Auto-playing voice for scenario', scenarioIndex + 1);
+
             try {
-                const response = await fetch('/api/game/state');
-                const state = await response.json();
-                
-                document.getElementById('budget').textContent = state.budget;
-                document.getElementById('happiness').textContent = state.happiness;
-                document.getElementById('day').textContent = state.day;
-                document.getElementById('scenario-day').textContent = state.scenario_day;
-                
-                // Update game phase if needed
-                if (state.game_phase !== currentPhase && 
-                    !['day1', 'day2', 'day3', 'final'].includes(currentPhase)) {
-                    currentPhase = state.game_phase;
+                const response = await fetch('/api/speak', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: scenarioText })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
+                const data = await response.json();
+                console.log('Voice response received:', data.status);
+
+                if (data.audio_url) {
+                    currentAudio = new Audio(data.audio_url);
+
+                    currentAudio.onended = () => {
+                        console.log('Audio finished for scenario', scenarioIndex + 1);
+                        enableOptions(scenarioIndex);
+                        if (audioStatus) {
+                            audioStatus.textContent = '✅ Audio complete. Make your choice!';
+                            audioStatus.style.background = '#c8e6c9';
+                            audioStatus.style.color = '#2e7d32';
+                        }
+                    };
+
+                    currentAudio.onerror = (e) => {
+                        console.error('Audio playback error:', e);
+                        enableOptions(scenarioIndex);
+                        if (audioStatus) {
+                            audioStatus.textContent = '⚠️ Audio unavailable. You can proceed.';
+                            audioStatus.style.background = '#fff3cd';
+                            audioStatus.style.color = '#856404';
+                        }
+                    };
+
+                    try {
+                        await currentAudio.play();
+                        console.log('Audio auto-playing for scenario', scenarioIndex + 1);
+                    } catch (playError) {
+                        console.error('Play error:', playError);
+                        enableOptions(scenarioIndex);
+                        if (audioStatus) {
+                            audioStatus.textContent = '⚠️ Audio unavailable. You can proceed.';
+                            audioStatus.style.background = '#fff3cd';
+                            audioStatus.style.color = '#856404';
+                        }
+                    }
+                } else {
+                    throw new Error('No audio URL in response');
+                }
             } catch (error) {
-                console.error('Error updating game state:', error);
+                console.error('Error generating speech:', error);
+                enableOptions(scenarioIndex);
+                if (audioStatus) {
+                    audioStatus.textContent = '⚠️ Audio unavailable. You can proceed.';
+                    audioStatus.style.background = '#fff3cd';
+                    audioStatus.style.color = '#856404';
+                }
             }
         }
-        
-        // Drag and drop for exploration
-        document.addEventListener('DOMContentLoaded', () => {
-            const cat = document.getElementById('mayor-cat');
-            const buildings = document.querySelectorAll('.building');
-            
-            // Drag start
-            cat.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', 'mayor-cat');
-                setTimeout(() => cat.style.opacity = '0.4', 0);
-            });
-            
-            // Drag end
-            cat.addEventListener('dragend', () => {
-                cat.style.opacity = '1';
-                buildings.forEach(b => b.classList.remove('dragover'));
-            });
-            
-            // Drag over buildings
-            buildings.forEach(building => {
-                building.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    building.classList.add('dragover');
-                });
-                
-                building.addEventListener('dragleave', () => {
-                    building.classList.remove('dragover');
-                });
-                
-                building.addEventListener('drop', async (e) => {
-                    e.preventDefault();
-                    building.classList.remove('dragover');
-                    
-                    const buildingName = building.dataset.building;
-                    
-                    // Record exploration
-                    await fetch('/api/game/explore', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            building: buildingName
-                        })
-                    });
-                    
-                    // Load exploration scenario
-                    await loadScenario('exploration', buildingName);
-                });
-            });
-            
-            // Initialize game
-            initGame();
-        });
+
+        function enableOptions(scenarioIndex) {
+            const optionA = document.getElementById(`optionA-${scenarioIndex}`);
+            const optionB = document.getElementById(`optionB-${scenarioIndex}`);
+            if (optionA) optionA.classList.remove('disabled');
+            if (optionB) optionB.classList.remove('disabled');
+        }
+
+        function selectOption(option, scenarioIndex) {
+            if (hasSubmitted) return; // Prevent changing after submission
+
+            selectedOption = option;
+
+            // Update button styling
+            const optionABtn = document.getElementById(`optionA-${scenarioIndex}`);
+            const optionBBtn = document.getElementById(`optionB-${scenarioIndex}`);
+            optionABtn.classList.remove('selected');
+            optionBBtn.classList.remove('selected');
+
+            if (option === 'A') {
+                optionABtn.classList.add('selected');
+            } else {
+                optionBBtn.classList.add('selected');
+            }
+
+            // Enable submit button
+            document.getElementById(`submitBtn-${scenarioIndex}`).disabled = false;
+        }
+
+        function submitAnswer(scenarioIndex) {
+            if (!selectedOption || hasSubmitted) return;
+
+            hasSubmitted = true;
+            const scenario = scenarios[scenarioIndex];
+
+            // Disable option buttons and submit button
+            const optionABtn = document.getElementById(`optionA-${scenarioIndex}`);
+            const optionBBtn = document.getElementById(`optionB-${scenarioIndex}`);
+            const submitBtn = document.getElementById(`submitBtn-${scenarioIndex}`);
+
+            optionABtn.classList.add('disabled');
+            optionBBtn.classList.add('disabled');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '✓ Submitted';
+
+            // Show analysis
+            const analysisSection = document.getElementById(`analysis-${scenarioIndex}`);
+            const analysisTitle = document.getElementById(`analysis-title-${scenarioIndex}`);
+            const analysisContent = document.getElementById(`analysis-content-${scenarioIndex}`);
+            const analysisLoading = document.getElementById(`analysis-loading-${scenarioIndex}`);
+
+            if (selectedOption === 'A') {
+                analysisTitle.textContent = '✅ Premium Choice Selected';
+                analysisContent.innerHTML = `
+                    <p><strong>Your Decision:</strong> You chose ${scenario.optionA.name} for $${scenario.optionA.total}.</p>
+                    <p><strong>Analysis:</strong> This is the higher-quality option. ${scenario.optionA.details}</p>
+                    <p><strong>Long-term Thinking:</strong> While you spend more upfront ($${scenario.savings} extra compared to Option B), 
+                    you're likely avoiding future problems, repairs, or complaints. This is an investment in quality and reliability.</p>
+                    <p><strong>Economic Lesson:</strong> Sometimes paying more initially saves money and headaches in the long run. 
+                    Consider the total cost of ownership, not just the sticker price!</p>
+                `;
+            } else {
+                analysisTitle.textContent = '⚠️ Budget Choice Selected';
+                analysisContent.innerHTML = `
+                    <p><strong>Your Decision:</strong> You chose ${scenario.optionB.name} for $${scenario.optionB.total}.</p>
+                    <p><strong>Analysis:</strong> You saved $${scenario.savings} immediately. ${scenario.optionB.details}</p>
+                    <p><strong>Short-term Thinking:</strong> The savings look good now, but there might be hidden costs: 
+                    repairs, replacements, complaints, or having to do it all over again soon.</p>
+                    <p><strong>Economic Lesson:</strong> "Buying cheap" can sometimes cost more in the long run. 
+                    This demonstrates <em>opportunity cost</em> - the trade-off between quality and savings. 
+                    As a mayor, you need to balance immediate budget concerns with long-term town welfare!</p>
+                    <p><strong>Better Choice:</strong> Option A (${scenario.optionA.name}) would have been the more sustainable decision, 
+                    even though it costs more upfront.</p>
+                `;
+            }
+
+            analysisSection.classList.add('show');
+
+            if (analysisLoading) analysisLoading.classList.add('show');
+            if (analysisTitle) analysisTitle.classList.add('analysis-hidden');
+            if (analysisContent) analysisContent.classList.add('analysis-hidden');
+
+            const analysisText = analysisContent.textContent.replace(/\s+/g, ' ').trim();
+            speakText(
+                `${analysisTitle.textContent}. ${analysisText}`,
+                () => {
+                    if (analysisLoading) analysisLoading.classList.remove('show');
+                    if (analysisTitle) analysisTitle.classList.remove('analysis-hidden');
+                    if (analysisContent) analysisContent.classList.remove('analysis-hidden');
+
+                    // Enable navigation buttons as soon as audio is loaded
+                    const nextBtn = document.getElementById(`nextBtn-${scenarioIndex}`);
+                    const finishBtn = document.getElementById(`finishBtn-${scenarioIndex}`);
+                    if (nextBtn) nextBtn.disabled = false;
+                    if (finishBtn) finishBtn.disabled = false;
+                },
+                () => {
+                    // Audio finished; no additional action needed
+                }
+            );
+
+            // Scroll to analysis
+            analysisSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+
+        function nextScenario() {
+            if (currentScenarioIndex < scenarios.length - 1) {
+                displayScenario(currentScenarioIndex + 1);
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function previousScenario() {
+            if (currentScenarioIndex > 0) {
+                displayScenario(currentScenarioIndex - 1);
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function finishGame() {
+            alert('🎉 Congratulations, Mayor! You\'ve completed all scenarios. You\'ve learned about opportunity cost, quality vs. savings, and long-term thinking!');
+            window.location.href = '/';
+        }
+
+        // Load scenarios when page loads
+        window.onload = loadScenarios;
     </script>
 </body>
+
 </html>
