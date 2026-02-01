@@ -5,3 +5,4 @@ requests==2.31.0
 google-generativeai==0.3.0
 elevenlabs==0.2.18
 google-genai
+pydantic<2 
