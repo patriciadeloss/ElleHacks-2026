@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: DynaPuff, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            width: 90vw;
+            max-width: 1000px;
+            box-sizing: border-box;
+        }
+
+        .gallery {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Card/gallery UI removed: endings are shown as full-background images */
+        /* Fallback links will be rendered as simple buttons when no final state is available */
+
+        /* Button used for viewing AR result */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.2rem;
+            background: #6acc59;
+            color: white;
+            border-radius: 2px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn:hover { background: #47903a; }
+
+        h1 { margin-bottom: 0.5rem; }
+        /* Larger AR button specifically */
+        #viewArBtn {
+            padding: 1.2rem 2rem !important;
+            font-size: 1.25rem !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="container" id="resultsContainer">
+
+            <div id="endingArea" style="margin-top:1rem;">
+                <!-- Ending content will be injected here based on finalGameState -->
+            </div>
+
+            <div style="margin-top:1.2rem; text-align:center;">
+                <a class="btn" id="viewArFallback" href="#" style="display:none;">View AR Result</a>
+            </div>
+        </div>
+
+        <script>
+            function renderEndingAsBackground(imgSrc, arLink) {
+                // Make the ending image a full-viewport background on the <body>
+                const bodyEl = document.body;
+                bodyEl.style.backgroundImage = `url('${imgSrc}')`;
+                bodyEl.style.backgroundSize = 'cover';
+                bodyEl.style.backgroundPosition = 'center';
+                bodyEl.style.backgroundRepeat = 'no-repeat';
+
+                // Ensure the results container doesn't have its own background
+                const container = document.getElementById('resultsContainer');
+                container.style.backgroundImage = 'none';
+                container.style.padding = '0';
+                container.style.borderRadius = '0';
+                container.style.width = '100%';
+                container.style.maxWidth = '100%';
+                container.style.boxSizing = 'border-box';
+
+                // Render an AR button fixed near the bottom center (above overlay)
+                const endingArea = document.getElementById('endingArea');
+                endingArea.innerHTML = ``;
+
+                // Create or update the fixed bottom button
+                let viewBtn = document.getElementById('viewArBtn');
+                if (!viewBtn) {
+                    viewBtn = document.createElement('a');
+                    viewBtn.id = 'viewArBtn';
+                    viewBtn.className = 'btn';
+                    viewBtn.textContent = 'View AR Result';
+                    document.body.appendChild(viewBtn);
+                }
+                viewBtn.href = arLink;
+                // Style the fixed button so it sits above the overlay and near the bottom
+                viewBtn.style.position = 'fixed';
+                viewBtn.style.left = '50%';
+                viewBtn.style.transform = 'translateX(-50%)';
+                viewBtn.style.bottom = '36px';
+                viewBtn.style.bottom = '150px';
+                viewBtn.style.zIndex = '3';
+
+                // No Back button on this page; only the AR button is shown
+
+                // Hide fallback button
+                const fallbackBtn = document.getElementById('viewArFallback');
+                if (fallbackBtn) fallbackBtn.style.display = 'none';
+            }
+
+            (function chooseEnding() {
+                try {
+                    const raw = sessionStorage.getItem('finalGameState');
+                    if (!raw) {
+                        // Fallback: show simple AR buttons if no state available
+                        document.getElementById('endingArea').innerHTML = `
+                            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                                <a class="btn" href="/static/ar_result1.html">View AR Result 1</a>
+                                <a class="btn" href="/static/ar_result2.html">View AR Result 2</a>
+                                <a class="btn" href="/static/ar_result3.html">View AR Result 3</a>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const state = JSON.parse(raw);
+                    const budget = Number(state.budget || 0);
+                    const happiness = Number(state.happiness || 0);
+
+                    // Rules:
+                    // 1) Ending 1: budget >= 500 && happiness > 60
+                    // 2) Ending 2: budget >= 500 && happiness <= 60 (more money but low happiness)
+                    // 3) Ending 3: budget < 500 && happiness > 60 (more happiness but less money)
+                    let img, link, title;
+
+                    if (budget >= 500 && happiness > 60) {
+                        img = '/static/img/ending1.png';
+                        link = '/static/ar_result1.html';
+                        title = 'Ending 1 — Thriving Town';
+                    } else if (budget >= 500 && happiness <= 60) {
+                        img = '/static/img/ending2.png';
+                        link = '/static/ar_result2.html';
+                        title = 'Ending 2 — Wealthy but Unhappy';
+                    } else if (budget < 500 && happiness > 60) {
+                        img = '/static/img/ending3.png';
+                        link = '/static/ar_result3.html';
+                        title = 'Ending 3 — Happy but Broke';
+                    } else {
+                        // Default fallback
+                        img = '/static/img/ending2.png';
+                        link = '/static/ar_result2.html';
+                        title = 'Ending 2 — Mixed Outcome';
+                    }
+
+                    renderEndingAsBackground(img, link);
+                } catch (e) {
+                    console.error('Error choosing ending:', e);
+                    document.getElementById('endingArea').innerHTML = '<p>Unable to determine ending. Try replaying the game.</p>';
+                }
+            })();
+
+            // Back button removed from this page; navigation handled in the main game
+        </script>
